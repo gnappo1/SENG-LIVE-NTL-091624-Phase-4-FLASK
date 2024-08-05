@@ -1,0 +1,8 @@
+#!/Users/matteo/Development/code/Flatiron/SENG-LIVE-060324/phase-4/lectures/SENG-LIVE-060324-Phase-4-FLASK/02_intro_to_flask/.venv/bin/python3
+# -*- coding: utf-8 -*-
+import re
+import sys
+from ipdb.__main__ import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
