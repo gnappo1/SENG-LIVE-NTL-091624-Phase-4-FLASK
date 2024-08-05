@@ -23,15 +23,31 @@ def productions():
     if request.method == "GET":
         try:
             #! return a list of dictionaries representing the productions
-            #! INSTEAD OF A LIST OF Production objects
+            #! INSTEAD OF A LIST OF Production objects WHICH IS NOT serializable
             prods = [prod.as_dict() for prod in Production.query.all()]
-            # return make_response(prods, 200, {})
+
+            # * make_response is the most flexible and explicit of the ways to create a response
+            # return make_response(prods, 200, {"Content-Type": "application/json"})
+
+            #! jsonify is invoked under the hood automatically
             # return jsonify(prods), 200
+
+            #! The following line leverages the fact that Flask will implicitly create a Response object
+            #! jsonify the data and set it as the body of the response object
             return prods, 200
+
         except Exception as e:
-            return {"error": e}, 400
+            return {"error": str(e)}, 400
     else:
-        import ipdb; ipdb.set_trace()
+        try:
+            data = request.get_json() #! you might get a 405 if content type has not been set
+            prod = Production(**data) #! model validations kick in at this point
+            db.session.add(prod)
+            db.session.commit() #! database constraints kick in
+            return prod.as_dict(), 201
+        except Exception as e:
+            db.session.rollback()
+            return {"error": e.description}, 400
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
