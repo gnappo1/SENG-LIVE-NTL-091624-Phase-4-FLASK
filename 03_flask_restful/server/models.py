@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
+from sqlalchemy_serializer import SerializerMixin
 
 metadata = MetaData(
     naming_convention={
@@ -13,8 +14,9 @@ metadata = MetaData(
 
 db = SQLAlchemy(metadata=metadata)
 
-class Production(db.Model):
-    __tablename__ = 'productions'
+
+class Production(db.Model, SerializerMixin):
+    __tablename__ = "productions"
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), nullable=False)
@@ -26,8 +28,22 @@ class Production(db.Model):
     ongoing = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-    
-    crew_members = db.relationship("CrewMember", back_populates="production")
+
+    crew_members = db.relationship("CrewMember", back_populates="production", cascade="all, delete-orphan")
+
+    # serialize_rules = ("-crew_members.production",)
+    serialize_only = (
+        "id",
+        "title",
+        "genre",
+        "director",
+        "description",
+        "budget",
+        "image",
+        "ongoing",
+        "created_at",
+        "updated_at",
+    )
 
     def __repr__(self):
         return f"""
@@ -36,31 +52,41 @@ class Production(db.Model):
                 Genre: {self.genre}
                 Director: {self.director}
         """
-    
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "genre": self.genre,
-            "director": self.director,
-            "description": self.description,
-            "budget": self.budget,
-            "image": self.image,
-            "ongoing": self.ongoing,
-        }
 
-class CrewMember(db.Model):
-    __tablename__ = 'crew_members'
+    # def as_dict(self):
+    #     return {
+    #         "id": self.id,
+    #         "title": self.title,
+    #         "genre": self.genre,
+    #         "director": self.director,
+    #         "description": self.description,
+    #         "budget": self.budget,
+    #         "image": self.image,
+    #         "ongoing": self.ongoing,
+    #     }
+
+
+class CrewMember(db.Model, SerializerMixin):
+    __tablename__ = "crew_members"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40), nullable=False)
     role = db.Column(db.String)
-    production_id = db.Column(db.Integer, db.ForeignKey('productions.id'))
+    production_id = db.Column(db.Integer, db.ForeignKey("productions.id"), nullable=False)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     production = db.relationship("Production", back_populates="crew_members")
+
+    # serialize_rules = (
+    #     "-production.crew_members",
+    #     "-production.created_at",
+    #     "-production.updated_at",
+    # )
+    serialize_only = ("id", "name", "role", "production_id", "created_at", "updated_at")
+    # serialize_rules = ("-production",)
+
     def __repr__(self):
         return f"""
             <CrewMember #{self.id}:
