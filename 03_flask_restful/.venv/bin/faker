@@ -1,0 +1,8 @@
+#!/Users/matteo/Development/code/Flatiron/SENG-LIVE-060324/phase-4/lectures/SENG-LIVE-060324-Phase-4-FLASK/03_flask_restful/.venv/bin/python
+# -*- coding: utf-8 -*-
+import re
+import sys
+from faker.cli import execute_from_command_line
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(execute_from_command_line())
