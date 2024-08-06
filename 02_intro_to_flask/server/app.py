@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+
+#! 📚 Review With Students:
+# API Fundamentals
+# MVC Architecture and Patterns / Best Practices
+# RESTful Routing
+# Serialization
+# Postman
+
+#! Set Up When starting from scratch:
+# In Terminal, `cd` into `server` and run the following:
+# export FLASK_APP=app.py
+# export FLASK_RUN_PORT=5555
+# flask db init
+# flask db migrate -m 'Create tables'
+# flask db upgrade
+# python seed.py
+
+
 from flask import Flask, request, jsonify, make_response
 from flask_migrate import Migrate
 from models import db, Production, CrewMember
