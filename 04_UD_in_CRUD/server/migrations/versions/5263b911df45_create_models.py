@@ -1,8 +1,8 @@
-"""create tables productions and crew_members
+"""create models
 
-Revision ID: db997eb3c029
+Revision ID: 5263b911df45
 Revises: 
-Create Date: 2024-08-05 12:39:51.395089
+Create Date: 2024-08-07 11:08:01.373793
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'db997eb3c029'
+revision = '5263b911df45'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,7 +35,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=40), nullable=False),
     sa.Column('role', sa.String(), nullable=True),
-    sa.Column('production_id', sa.Integer(), nullable=True),
+    sa.Column('production_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['production_id'], ['productions.id'], name=op.f('fk_crew_members_production_id_productions')),

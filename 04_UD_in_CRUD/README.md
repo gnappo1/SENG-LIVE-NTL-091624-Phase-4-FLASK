@@ -20,4 +20,3 @@
 - Serializing Relationships
 - Handling Exceptions
 - Model Validations
-- BONUS: Using app-level validations in Views with reqparse
