@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
+from sqlalchemy.orm import validates
 from sqlalchemy_serializer import SerializerMixin
+import re
 
 metadata = MetaData(
     naming_convention={
@@ -17,9 +19,14 @@ db = SQLAlchemy(metadata=metadata)
 
 class Production(db.Model, SerializerMixin):
     __tablename__ = "productions"
+    __table_args__ = (
+        db.CheckConstraint("budget >= 0 AND budget < 1000000", name="check_positive_budget_less_than_one_million"),
+        db.UniqueConstraint("title", "director", name="uq_title_per_director"),
+    )
+    
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), nullable=False)
+    title = db.Column("title", db.String(80), nullable=False, unique=True)
     genre = db.Column(db.String, nullable=False)
     director = db.Column(db.String)
     description = db.Column(db.String)
@@ -52,6 +59,42 @@ class Production(db.Model, SerializerMixin):
                 Genre: {self.genre}
                 Director: {self.director}
         """
+
+    # @property
+    # def title(self):
+    #     return self._title
+
+    # @title.setter
+    # def title(self, new_title):
+    #     if not isinstance(new_title, str):
+    #         raise TypeError('Titles must be of type str')
+    #     elif not new_title:
+    #         raise ValueError("Titles must have a length")
+    #     self._title = new_title
+
+    @validates("title", "description")
+    def validate_title(self, key, value):
+        if not isinstance(value, str):
+            raise TypeError(f'{key.title()}s must be of type str')
+        elif not value:
+            raise ValueError(f"{key.title()}s must have a length")
+        return value
+
+    @validates("genre")
+    def validate_genre(self, _, value):
+        if not isinstance(value, str):
+            raise TypeError(f"Genres must be of type str")
+        elif value.title() not in ["Drama", "Musical", "Opera"]:
+            raise ValueError("Genres must be one of Drama, Musical, Opera")
+        return value
+
+    @validates("image")
+    def validate_image(self, _, value):
+        if not isinstance(value, str):
+            raise TypeError(f"Images must be of type str")
+        elif not re.match(r"^https?:\/\/.*\.(?:jpeg|jpg|png)$", value):
+            raise ValueError("Images must be of type jpeg, jpg, png")
+        return value
 
     # def as_dict(self):
     #     return {

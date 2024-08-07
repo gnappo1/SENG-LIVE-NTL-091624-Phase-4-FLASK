@@ -1,8 +1,8 @@
 """create models
 
-Revision ID: 5263b911df45
+Revision ID: 3e6b59bc6c1e
 Revises: 
-Create Date: 2024-08-07 11:08:01.373793
+Create Date: 2024-08-07 12:20:42.021676
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5263b911df45'
+revision = '3e6b59bc6c1e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,10 @@ def upgrade():
     sa.Column('ongoing', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_productions'))
+    sa.CheckConstraint('budget >= 0 AND budget < 1000000', name=op.f('ck_productions_`check_positive_budget_less_than_one_million`')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_productions')),
+    sa.UniqueConstraint('title', 'director', name='uq_title_per_director'),
+    sa.UniqueConstraint('title', name=op.f('uq_productions_title'))
     )
     op.create_table('crew_members',
     sa.Column('id', sa.Integer(), nullable=False),

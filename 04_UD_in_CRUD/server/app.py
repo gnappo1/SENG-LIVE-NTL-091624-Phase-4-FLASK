@@ -17,7 +17,7 @@
 # python seed.py
 
 
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template, g
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
@@ -39,43 +39,21 @@ api = Api(app, prefix="/api/v1")
 
 @app.route("/")
 def homepage():
-    return "Hello World!"
-
-# @app.route("/productions", methods=["GET", "POST"])
-# def productions():
-#     if request.method == "GET":
-#         try:
-#             #! return a list of dictionaries representing the productions
-#             #! INSTEAD OF A LIST OF Production objects WHICH IS NOT serializable
-#             prods = [prod.as_dict() for prod in Production.query.all()]
-
-#             # * make_response is the most flexible and explicit of the ways to create a response
-#             # return make_response(prods, 200, {"Content-Type": "application/json"})
-
-#             #! jsonify is invoked under the hood automatically
-#             # return jsonify(prods), 200
-
-#             #! The following line leverages the fact that Flask will implicitly create a Response object
-#             #! jsonify the data and set it as the body of the response object
-#             return prods, 200
-
-
-#         except Exception as e:
-#             return {"error": str(e)}, 400
-#     else:
-#         try:
-#             data = request.get_json() #! you might get a 405 if content type has not been set
-#             prod = Production(**data) #! model validations kick in at this point
-#             db.session.add(prod)
-#             db.session.commit() #! database constraints kick in
-#             return prod.as_dict(), 201
-#         except Exception as e:
-#             db.session.rollback()
-#             return {"error": e.description}, 400
+    productions = Production.query.all()
+    return render_template("homepage.html", prods=productions)
 
 @app.errorhandler(NotFound)
 def page_not_found(error):
     return "This page does not exist", 404
+
+@app.before_request
+def load_production():
+    if request.endpoint == "productionbyid":
+        string_id = request.path.split("/")[-1]
+        if prod := Production.query.get(int(string_id)):
+            g.production = prod
+        else:
+            return {"error": f"Could not find a Production with id #{string_id}"}, 404
 
 
 class Productions(Resource):
@@ -96,18 +74,35 @@ class Productions(Resource):
             return prod.to_dict(), 201
         except Exception as e:
             db.session.rollback()
-            return {"error": e.description}, 400
+            return {"error": str(e)}, 400
 
 class ProductionByID(Resource):
     def get(self, id):
         try:
-
-            # prod = db.session.get(Production, id)
-            if prod := Production.query.get(id):
-                return prod.to_dict(rules=("crew_members",)), 200
-            return {"error": f"Could not find a Production with id #{id}"}, 404
+            return g.production.to_dict(rules=("crew_members",)), 200
         except Exception as e:
-            return {"error": str(e)}
+            return {"error": str(e)}, 400
+
+    def patch(self, id):
+        try:
+            #! extract request's data
+            data = request.get_json()
+            #! use the data to patch the object
+            for attr, value in data.items():
+                setattr(g.production, attr, value) #! MODEL VALIDATIONS KICK IN HERE
+            db.session.commit()
+            #! return the serialized patched object
+            return g.production.to_dict(rules=("crew_members",)), 202
+        except Exception as e:
+            return {"error": str(e)}, 422
+
+    def delete(self, id):
+        try:
+            db.session.delete(g.production)
+            db.session.commit()
+            return {}, 204
+        except Exception as e:
+            return {"error": str(e)}, 422
 
 api.add_resource(Productions, "/productions")
 api.add_resource(ProductionByID, "/productions/<int:id>")
