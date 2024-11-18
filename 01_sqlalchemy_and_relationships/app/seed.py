@@ -4,7 +4,7 @@ import random
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# from models import Pet, Owner
+from models import Pet, Owner
 import logging
 
 logging.basicConfig()
@@ -18,8 +18,8 @@ if __name__ == "__main__":
     # with Session.begin() as session:
 
     # 2.a ✅ Add delete methods for Pet and Owner to clear the database before each seeding
-    # session.query(Pet).delete()
-    # session.query(Owner).delete()
+    session.query(Pet).delete()
+    session.query(Owner).delete()
 
     # Initialize faker
     fake = Faker()
@@ -56,21 +56,22 @@ if __name__ == "__main__":
 
     # Create a for loop that iterates 50 times
     for _ in range(50):
-        pass
+        # pass
         # Create an owner using data from faker
-        # owner = Owner(
-        #     name=f"{fake.first_name()} {fake.last_name()}",
-        #     email=fake.email(),
-        #     phone=random.randint(1000000000, 9999999999),
-        #     address=fake.address(),
-        # )
+        owner = Owner(
+            name=f"{fake.first_name()} {fake.last_name()}",
+            email=fake.email(),
+            phone=str(random.randint(1000000000, 9999999999)),
+            address=fake.address(),
+        )
+        # import ipdb; ipdb.set_trace()
 
         # Use .add and .commit to save the owner one at a time, so we maintain the owner ID in our instance.
-        # session.add(owner)
-        # session.commit()
+        session.add(owner)
+        session.commit()
 
         # Append each new owner to the owners array
-        # owners.append(owner)
+        owners.append(owner)
 
     # Create an empty pets array
     pets = []
@@ -84,24 +85,24 @@ if __name__ == "__main__":
             # Use faker and the species, cat breeds, dog breeds and temperament Lists to create a pet
             rand_species = random.choice(species)
 
-            # pet = Pet(
-            #     name=fake.name(),
-            #     species=rand_species,
-            #     breed=(
-            #         random.choice(cat_breeds)
-            #         if rand_species == "Cat"
-            #         else random.choice(dog_breeds)
-            #     ),
-            #     temperament=random.choice(temperaments),
-            #     owner_id=owner.id,
-            # )
+            pet = Pet(
+                name=fake.name(),
+                species=rand_species,
+                breed=(
+                    random.choice(cat_breeds)
+                    if rand_species == "Cat"
+                    else random.choice(dog_breeds)
+                ),
+                temperament=random.choice(temperaments),
+                owner_id=owner.id,
+            )
 
             # Use .add and .commit to save the pet to the database
-            # session.add(pet)
-            # session.commit()
+            session.add(pet)
+            session.commit()
 
             # Append the pet to the pets array
-            # pets.append(pet)
+            pets.append(pet)
     import ipdb
 
     ipdb.set_trace()
