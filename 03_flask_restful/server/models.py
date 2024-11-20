@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy import MetaData
 
 metadata = MetaData(
@@ -14,7 +15,8 @@ metadata = MetaData(
 
 db = SQLAlchemy(metadata=metadata)
 
-class Production(db.Model):
+
+class Production(db.Model, SerializerMixin):
     __tablename__ = "productions"
 
     __table_args__ = (
@@ -35,7 +37,14 @@ class Production(db.Model):
     )
 
     #! ORM side of things
-    crew_members = db.relationship("CrewMember", back_populates="production")
+    crew_members = db.relationship("CrewMember", back_populates="production", cascade="all, delete-orphan")
+    #! serialization rules
+    # serialize_only = ("id", "title", "genre", "director", "description", "budget", "image", "ongoing")
+    serialize_rules = (
+        "-created_at",
+        "-updated_at",
+        "-crew_members.production",
+    )
 
     def __repr__(self):
         return f"""
@@ -45,20 +54,20 @@ class Production(db.Model):
                 Director: {self.director}    
         """
 
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "genre": self.genre,
-            "director": self.director,
-            "description": self.description,
-            "budget": self.budget,
-            "image": self.image,
-            "ongoing": self.ongoing,
-        }
+    # def as_dict(self):
+    #     return {
+    #         "id": self.id,
+    #         "title": self.title,
+    #         "genre": self.genre,
+    #         "director": self.director,
+    #         "description": self.description,
+    #         "budget": self.budget,
+    #         "image": self.image,
+    #         "ongoing": self.ongoing,
+    #     }
 
 
-class CrewMember(db.Model):
+class CrewMember(db.Model, SerializerMixin):
     __tablename__ = "crew_members"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +81,10 @@ class CrewMember(db.Model):
     #! ORM side of things
     production = db.relationship("Production", back_populates="crew_members")
 
+    #! serialization rules
+    # serialize_only = ("id", "name", "role", "production_id")
+    serialize_rules = ("-created_at", "-updated_at", "-production.crew_members")
+
     def __repr__(self):
         return f"""
             CrewMember #{self.id}:
@@ -79,3 +92,4 @@ class CrewMember(db.Model):
                 Genre: {self.role},
                 Director: {self.production_id}    
         """
+
