@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy import MetaData
+from sqlalchemy.orm import validates
 
 metadata = MetaData(
     naming_convention={
@@ -66,6 +67,15 @@ class Production(db.Model, SerializerMixin):
     #         "ongoing": self.ongoing,
     #     }
 
+    @validates("title", "director")
+    def validate_title(self, attr, value):
+        if not isinstance(value, str):
+            raise TypeError(f"{attr} must be a string")
+        if not value:
+            raise ValueError(f"{attr} must be at least one character")
+        if len(value) > 80:
+            raise ValueError(f"{attr} must be 80 characters max")
+        return value
 
 class CrewMember(db.Model, SerializerMixin):
     __tablename__ = "crew_members"
@@ -92,4 +102,3 @@ class CrewMember(db.Model, SerializerMixin):
                 Genre: {self.role},
                 Director: {self.production_id}    
         """
-
