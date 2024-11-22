@@ -10,9 +10,7 @@
 # python seed.py
 
 #! External libraries imports
-from flask import request, g, render_template, make_response
-from time import time
-from flask_restful import Resource
+from flask import request, g, render_template
 from werkzeug.exceptions import NotFound
 
 #! Internal imports

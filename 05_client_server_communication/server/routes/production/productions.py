@@ -20,5 +20,4 @@ class Productions(Resource):
             db.session.commit()  #! database constraints kick in
             return prod.to_dict(), 201
         except Exception as e:
-            db.session.rollback()
             return {"error": str(e)}, 400
