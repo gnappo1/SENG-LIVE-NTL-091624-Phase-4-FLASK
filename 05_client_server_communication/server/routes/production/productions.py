@@ -8,7 +8,7 @@ class Productions(Resource):
             # return make_response(serialized_prods, 200)
             return serialized_prods, 200
         except Exception as e:
-            return {"error": str(e)}
+            return {"error": str(e)}, 400
 
     def post(self):
         try:

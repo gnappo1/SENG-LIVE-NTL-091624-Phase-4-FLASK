@@ -2,26 +2,48 @@ import  {useParams, useNavigate } from 'react-router-dom'
 import {useEffect, useState} from 'react'
 import styled from 'styled-components'
 import { useOutletContext } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 function ProductionDetail() {
   const [production, setProduction] = useState({crew_members:[]})
-  const [error, setError] = useState(null)
+  // const [error, setError] = useState(null)
   const { handleEdit, deleteProduction } = useOutletContext()
 
   //Student Challenge: GET One 
-  const params = useParams()
+  const { productionId } = useParams()
   const navigate = useNavigate()
+
   useEffect(()=>{
+    (async () => {
+      const resp = await fetch(`/api/v1/productions/${productionId}`)
+      const data = await resp.json()
+      if (resp.ok) {
+        setProduction(data)
+      } else {
+        toast.error(data.error)
+      }
+    })()
+  }, [productionId])
 
-  },[])
-
-  const handleDelete = (production) => {
-
+  const handleDelete = async () => {
+    const resp = await fetch(`/api/v1/productions/${productionId}`, {
+      method: "DELETE"
+    })
+    if (resp.ok) {
+      // #! what do we do now that the production has been deleted?
+      toast.success(`Successfully deleted Production with id ${productionId}`)
+      // #! we need to remove the deleted production from the productions state variable inside App.jsx
+      deleteProduction(productionId)
+      navigate("/")
+    } else {
+      const data = await resp.json()
+      toast.error(data.error)
+    }
   }
 
   
   const {id, title, genre, image,description, crew_members} = production 
-  if(error) return <h2>{error}</h2>
+  // if(error) return <h2>{error}</h2>
   return (
       <CardDetail id={id}>
         <h1>{title}</h1>
@@ -33,13 +55,13 @@ function ProductionDetail() {
               <p>{description}</p>
               <h2>Cast Members</h2>
               <ul>
-                {crew_members.map(cast => <li>{`${cast.role} : ${cast.name}`}</li>)}
+                {crew_members.map(cast => <li key={cast.id}>{`${cast.role} : ${cast.name}`}</li>)}
               </ul>
             </div>
             <img src={image} alt={title}/>
           </div>
-      <button onClick={()=> handleEdit(production)} >Edit Production</button>
-      <button onClick={()=> handleDelete(production)} >Delete Production</button>
+      <button onClick={handleEdit} >Edit Production</button>
+      <button onClick={handleDelete} >Delete Production</button>
 
       </CardDetail>
     )

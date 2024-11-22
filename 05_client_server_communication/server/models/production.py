@@ -1,4 +1,4 @@
-from . import SerializerMixin, validates, re, db
+from models.__init__ import SerializerMixin, validates, re, db
 
 class Production(db.Model, SerializerMixin):
     __tablename__ = "productions"

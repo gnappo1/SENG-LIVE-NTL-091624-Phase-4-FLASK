@@ -5,6 +5,8 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { createGlobalStyle } from 'styled-components'
 import { useEffect, useState } from 'react'
 import Header from './components/navigation/Header'
+import toast, {Toaster} from "react-hot-toast"
+import "./App.css" 
 
 function App() {
   const [productions, setProductions] = useState([])
@@ -12,15 +14,29 @@ function App() {
   const navigate = useNavigate()
 
   //5.✅ GET Productions
+  useEffect(() => {
+    (async () => {
+      const resp = await fetch("/api/v1/productions")
+      const data = await resp.json()
+      if (resp.ok) {
+        setProductions(data)
+      } else {
+        toast.error(data.error)
+      }
+    })()
+  }, [])
 
   // 6.✅ navigate to client/src/components/ProductionForm.js
 
-  const addProduction = (production) => setProductions(productions => [...productions, production])
+  const addProduction = (production) => {
+    debugger
+    setProductions(productions => [...productions, production])
+  }
   const updateProduction = (updated_production) => setProductions(productions => (
     productions.map(production => production.id === updated_production.id ? updated_production : production)
   ))
-  const deleteProduction = (deleted_production) => setProductions(productions => (
-    productions.filter((production) => production.id !== deleted_production.id)
+  const deleteProduction = (deleted_production_id) => setProductions(productions => (
+    productions.filter((production) => production.id !== parseInt(deleted_production_id))
   ))
 
   const handleEdit = (production) => {
@@ -32,6 +48,7 @@ function App() {
     <>
       <GlobalStyle />
       <Header handleEdit={handleEdit} />
+      <Toaster />
       <Outlet context={{ addProduction, updateProduction, deleteProduction, productions, production_edit, handleEdit }} />
     </>
   )
