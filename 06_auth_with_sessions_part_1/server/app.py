@@ -10,17 +10,19 @@
 # python seed.py
 
 #! External libraries imports
-from flask import request, g, render_template
+from flask import request, g, render_template, session
 from werkzeug.exceptions import NotFound
 
 #! Internal imports
 from app_config import app, api, db
 from models.production import Production
 from models.crew_member import CrewMember
+from models.user import User
 from routes.crew_member.crew_member_by_id import CrewMemberByID
 from routes.crew_member.crew_members import CrewMembers
 from routes.production.production_by_id import ProductionByID
 from routes.production.productions import Productions
+from routes.auth.login import Login
 
 #! ==================
 #! GENERAL ROUTE CONCERNS
@@ -41,7 +43,6 @@ def before_request():
     #     id = request.view_args.get("id")
     #     crew = db.session.get(CrewMember, id)
     #     g.crew = crew
-
     #! Better Approach
     path_dict = {"productionbyid": Production, "crewmemberbyid": CrewMember}
     if request.endpoint in path_dict:
@@ -72,6 +73,7 @@ api.add_resource(Productions, "/productions")
 api.add_resource(ProductionByID, "/productions/<int:id>")
 api.add_resource(CrewMembers, "/crew-members")
 api.add_resource(CrewMemberByID, "/crew-members/<int:id>")
+api.add_resource(Login, "/login")
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
