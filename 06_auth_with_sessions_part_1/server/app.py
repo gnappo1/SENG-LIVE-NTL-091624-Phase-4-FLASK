@@ -23,6 +23,9 @@ from routes.crew_member.crew_members import CrewMembers
 from routes.production.production_by_id import ProductionByID
 from routes.production.productions import Productions
 from routes.auth.login import Login
+from routes.auth.signup import Signup
+from routes.auth.logout import Logout
+from routes.auth.current_user import CurrentUser
 
 #! ==================
 #! GENERAL ROUTE CONCERNS
@@ -73,7 +76,10 @@ api.add_resource(Productions, "/productions")
 api.add_resource(ProductionByID, "/productions/<int:id>")
 api.add_resource(CrewMembers, "/crew-members")
 api.add_resource(CrewMemberByID, "/crew-members/<int:id>")
+api.add_resource(Signup, "/signup")
 api.add_resource(Login, "/login")
+api.add_resource(Logout, "/logout")
+api.add_resource(CurrentUser, "/current-user")
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
