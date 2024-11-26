@@ -13,6 +13,6 @@ class Login(Resource):
                 session["user_id"] = user.id #! THIS IS HOW WE LOGIN
                 return make_response(user.to_dict(), 200)
             else:
-                return make_response("Invalid Credentials", 401)
+                return make_response({"error": "Invalid Credentials"}, 401)
         except Exception as e:
-            return {"error": str(e)}, 400
+            return make_response({"error": str(e)}, 400)

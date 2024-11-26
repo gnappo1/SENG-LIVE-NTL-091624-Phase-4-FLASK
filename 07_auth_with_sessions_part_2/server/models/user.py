@@ -40,7 +40,7 @@ class User(db.Model, SerializerMixin):
 
     @validates("username")
     def validate_username(self, _, username):
-        if not re.match(r"^[a-zA-Z0-9_]*$", username):
+        if not re.match(r"^[a-zA-Z0-9_]+$", username):
             raise ValueError("Username must be alphanumeric with underscores only")
         return username
 

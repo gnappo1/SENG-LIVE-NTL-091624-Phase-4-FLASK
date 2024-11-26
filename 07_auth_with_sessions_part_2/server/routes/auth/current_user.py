@@ -12,4 +12,4 @@ class CurrentUser(Resource):
                 return make_response({"error": "Unauthorized, user_id in session does not exist, it has been removed"}, 401)
             return make_response({"error": "Unauthorized, please login!"}, 401)
         except Exception as e:
-            return {"error": str(e)}, 422
+            return make_response({"error": str(e)}, 422)

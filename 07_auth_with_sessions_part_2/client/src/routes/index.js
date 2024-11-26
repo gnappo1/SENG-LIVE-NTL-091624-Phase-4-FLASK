@@ -5,6 +5,7 @@ import Error from '../components/errors/Error'
 import ProductionForm from '../components/production/ProductionForm'
 import ProductionDetail from '../components/production/ProductionDetail'
 import ProductionEdit from '../components/production/ProductionEdit'
+import Registration from '../components/auth/Registration'
 
 export const router = createBrowserRouter([
     {
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
             {
                 path: "/productions/:productionId",
                 element: <ProductionDetail />
+            },
+            {
+                path: "/registration",
+                element: <Registration />
             }
         ]
     }

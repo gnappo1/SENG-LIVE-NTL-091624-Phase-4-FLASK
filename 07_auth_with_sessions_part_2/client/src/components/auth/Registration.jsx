@@ -7,15 +7,15 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 
 const signupSchema = object({
   username: string("username has to be a string")
-    .max(25, "username must be 25 characters max")
+    .max(20, "username must be 20 characters max")
     .required("username is required"),
   email: string("email has to be a string")
     .email("email must be valid")
     .max(80, "email must be 80 characters max")
     .required("email is required"),
   password: string("password has to be a string")
-    .min(8, "password has to be at least 8 characters long")
-    .max(25, "password must be 25 characters long max")
+    .min(10, "password has to be at least 10 characters long")
+    .max(20, "password must be 20 characters long max")
     .required("password is required"),
 });
 
@@ -30,9 +30,22 @@ const signinSchema = object({
     .required("password is required"),
 });
 
+const initialValues = {
+  username: "",
+  email: "",
+  password: "",
+}
+
 const Registration = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { currentUser, updateUser } = useOutletContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
 
   return (
     <div>
@@ -41,20 +54,90 @@ const Registration = () => {
       <button onClick={() => setIsLogin((current) => !current)}>
         {isLogin ? "Register Now!" : "Login!"}
       </button>
-      <Form>
-        {!isLogin && (
-          <>
-            <label htmlFor="username">Username</label>
-            <input type="text" name="username" />
-          </>
-        )}
-        <label htmlFor="email">Email</label>
-        <input type="email" name="email" />
-        <label htmlFor="password">Password</label>
-        <input type="password" name="password" />
+      <Formik
+        initialValues={initialValues}
+        onSubmit={async (values) => {
+          const url = isLogin ? "/api/v1/login" : "/api/v1/signup"
+          const resp = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: JSON.stringify(values)
+          });
+          const data = await resp.json()
+          if (resp.ok) { //200-299
+            toast.success(
+              isLogin
+                ? `Welcome back ${data.username}`
+                : `Welcome ${data.username}`
+            );
+            //! what do we do with the user???
+            updateUser(data);
+            navigate("/")
+          } else {
+            toast.error(data.error)
+          }
+        }}
+        validationSchema={isLogin ? signinSchema : signupSchema}
+      >
+        {({
+          handleBlur,
+          handleChange,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+          isSubmitting,
+        }) => (
+          <Form onSubmit={handleSubmit}>
+            {!isLogin && (
+              <>
+                <label htmlFor="username">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.username}
+                />
+                {errors.username && touched.username && (
+                  <div className="error-message show">{errors.name}</div>
+                )}
+              </>
+            )}
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.email}
+            />
+            {errors.email && touched.email && (
+              <div className="error-message show">{errors.email}</div>
+            )}
 
-        <input type="submit" value={isLogin ? "Login!" : "Create Account!"} />
-      </Form>
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.password}
+            />
+            {errors.password && touched.password && (
+              <div className="error-message show">{errors.password}</div>
+            )}
+
+            <input
+              type="submit"
+              value={isLogin ? "Login!" : "Create Account!"}
+            />
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 };

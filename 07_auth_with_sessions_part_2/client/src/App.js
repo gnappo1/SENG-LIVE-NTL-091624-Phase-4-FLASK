@@ -9,6 +9,7 @@ import toast, { Toaster } from "react-hot-toast"
 import "./App.css"
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null)
   const [productions, setProductions] = useState([])
   const [production_edit, setProductionEdit] = useState(false)
   const navigate = useNavigate()
@@ -25,6 +26,20 @@ function App() {
       }
     })()
   }, [])
+  const updateUser = (value) => setCurrentUser(value)
+
+  useEffect(() => {
+    (async () => {
+      const resp = await fetch("/api/v1/current-user")
+      const data = await resp.json()
+      if (resp.ok) {
+        updateUser(data)
+      } else {
+        toast.error(data.error)
+        navigate("/registration")
+      }
+    })()
+  }, [navigate])
 
   const addProduction = (production) => {
     setProductions(productions => [...productions, production])
@@ -41,12 +56,13 @@ function App() {
     navigate(`/productions/${production.id}/edit`)
   }
 
+
   return (
     <>
       <GlobalStyle />
-      <Header handleEdit={handleEdit} />
+      <Header handleEdit={handleEdit} currentUser={currentUser} updateUser={updateUser} />
       <Toaster />
-      <Outlet context={{ addProduction, updateProduction, deleteProduction, productions, production_edit, handleEdit }} />
+      <Outlet context={{ addProduction, updateProduction, deleteProduction, productions, production_edit, handleEdit, updateUser, currentUser }} />
     </>
   )
 }

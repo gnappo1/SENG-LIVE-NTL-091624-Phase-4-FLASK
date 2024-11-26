@@ -11,4 +11,4 @@ class Logout(Resource):
             response.delete_cookie("session")
             return response
         except Exception as e:
-            return {"error": str(e)}, 422
+            return make_response({"error": str(e)}, 422)

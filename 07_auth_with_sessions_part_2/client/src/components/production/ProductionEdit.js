@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useFormik } from "formik"
@@ -8,7 +8,13 @@ import * as yup from "yup"
 
 function ProductionFormEdit() {
   const navigate = useNavigate()
-  const { updateProduction, production_edit } = useOutletContext()
+  const { updateProduction, production_edit, currentUser } = useOutletContext()
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/registration");
+    }
+  }, [currentUser, navigate]);
 
   const formSchema = yup.object().shape({
     title: yup.string().required("Must enter a title"),

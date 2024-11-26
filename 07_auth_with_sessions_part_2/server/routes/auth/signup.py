@@ -18,6 +18,6 @@ class Signup(Resource):
             session["user_id"] = user.id
             return make_response(user.to_dict(), 201)
         except IntegrityError as e:
-            return {"error": str(e.orig)}, 422
+            return make_response({"error": str(e.orig)}, 422)
         except Exception as e:
-            return {"error": str(e)}, 422
+            return make_response({"error": str(e)}, 422)
